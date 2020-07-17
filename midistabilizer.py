@@ -2,6 +2,7 @@ import json
 import mido
 import mido.backends.rtmidi
 import os
+import rtmidi
 import time
 
 
@@ -16,7 +17,7 @@ def load_config():
 
 
 def detect_input_port(base_name):
-    input_names = mido.get_input_names()
+    input_names = midi_in.get_ports()
     for name in input_names:
         if base_name in name:
             in_port = mido.open_input(name)
@@ -25,7 +26,7 @@ def detect_input_port(base_name):
 
 
 def detect_output_port(base_name):
-    output_names = mido.get_output_names()
+    output_names = midi_out.get_ports()
     for name in output_names:
         if base_name in name:
             out_port = mido.open_output(name)
@@ -65,6 +66,9 @@ if __name__ == '__main__':
     config = load_config()
     ports = config['MIDI Ports']
     times = config['Sleep Times']
+
+    midi_in = rtmidi.MidiIn()
+    midi_out = rtmidi.MidiOut()
 
     connect_input_port(ports['input'], times['connect'])
     connect_output_port(ports['output'], times['connect'])
