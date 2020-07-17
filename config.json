@@ -1,0 +1,10 @@
+{
+  "MIDI Ports": {
+    "input": "CASIO",
+    "output": "Stabilizer"
+  },
+  "Sleep Times": {
+    "main": 0.00001,
+    "connect": 0.1
+  }
+}
