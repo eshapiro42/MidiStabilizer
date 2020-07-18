@@ -6,5 +6,6 @@
   "Sleep Times": {
     "main": 0.00001,
     "connect": 0.1
-  }
+  },
+  "Dependent Process": "CFX Concert Grand x64.exe"
 }

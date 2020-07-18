@@ -2,6 +2,7 @@ import json
 import mido
 import mido.backends.rtmidi
 import os
+import psutil
 import rtmidi
 import time
 
@@ -14,6 +15,24 @@ def load_config():
     with open(config_file, 'r') as f:
         config = json.load(f)
     return config
+
+
+def find_process(process_name):
+    for proc in psutil.process_iter(['name']):
+        if proc.info['name'] == process_name:
+            return proc
+    print('Could not find a running process called {}'.format(process_name))
+    return None
+
+
+def suspend_process(proc):
+    if proc is not None:
+        proc.suspend()
+
+
+def resume_process(proc):
+    if proc is not None:
+        proc.resume()
 
 
 def detect_input_port(base_name):
@@ -63,9 +82,14 @@ def disconnected(msg):
 
 
 if __name__ == '__main__':
+    proc = None
     config = load_config()
     ports = config['MIDI Ports']
     times = config['Sleep Times']
+    process_name = config['Dependent Process']
+
+    if process_name:
+        proc = find_process(process_name)
 
     midi_in = rtmidi.MidiIn()
     midi_out = rtmidi.MidiOut()
@@ -78,8 +102,11 @@ if __name__ == '__main__':
     while True:
         for msg in in_port.iter_pending():
             if disconnected(msg):
-                out_port.reset()
+                out_port.panic()
+                time.sleep(1)
+                suspend_process(proc)
                 connect_input_port(ports['input'], times['connect'])
+                resume_process(proc)
                 print('Successfully reconnected')
             out_port.send(msg)
         time.sleep(times['main'])
